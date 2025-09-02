@@ -30,61 +30,112 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
-        .animate-pulse {
+        .critical-time {
             animation: pulse 1s infinite;
         }
     </style>
   </head>
-  <body class="bg-slate-900 text-white antialiased overflow-hidden">
-    <main class="w-screen h-screen flex flex-col md:flex-row font-sans">
-        <aside class="w-full md:w-72 md:flex-shrink-0 bg-slate-800 p-2 md:p-6 flex flex-col items-center justify-start md:justify-between gap-4 md:gap-0 border-b md:border-b-0 md:border-r border-slate-700 shadow-2xl">
-          <div>
-            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-center">Country Guesser</h1>
-            <div class="mt-4 space-y-3">
+  <body class="bg-slate-900 text-white antialiased h-screen overflow-hidden">
+    <!-- Mobile Sidebar (Off-canvas) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden"></div>
+    <aside id="mobile-sidebar" class="fixed top-0 left-0 h-full w-72 bg-slate-800 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out p-6 flex flex-col md:hidden">
+        <div class="flex-1">
+            <div class="flex items-center justify-between mb-8">
+              <h1 class="text-2xl font-extrabold tracking-tight">Country Guesser</h1>
+              <button id="close-sidebar-btn" class="p-1 text-slate-400 hover:text-white" aria-label="Close menu">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="space-y-3">
               <div class="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
                 <span class="font-semibold text-base">Study Mode</span>
-                <button id="study-mode-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-600">
+                <button id="study-mode-toggle-mobile" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-600">
                   <span class="sr-only">Toggle Study Mode</span>
-                  <span id="study-mode-switch" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1"></span>
+                  <span id="study-mode-switch-mobile" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1"></span>
                 </button>
               </div>
               <div class="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
                 <span class="font-semibold text-base">Timed Mode</span>
-                <button id="timed-mode-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-cyan-500">
+                <button id="timed-mode-toggle-mobile" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-cyan-500">
                   <span class="sr-only">Toggle Timed Mode</span>
-                  <span id="timed-mode-switch" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-6"></span>
+                  <span id="timed-mode-switch-mobile" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-6"></span>
+                </button>
+              </div>
+            </div>
+        </div>
+        <div id="mobile-sidebar-footer">
+          <!-- High score will be rendered here -->
+        </div>
+    </aside>
+
+    <main class="w-screen h-screen flex flex-row font-sans">
+        <!-- Desktop Sidebar (visible on md+) -->
+        <aside class="hidden md:flex md:w-72 md:flex-shrink-0 bg-slate-800 p-6 flex-col justify-between border-r border-slate-700 shadow-2xl">
+          <div>
+            <h1 class="text-4xl font-extrabold tracking-tight text-center">Country Guesser</h1>
+            <div class="mt-4 space-y-3">
+              <div class="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
+                <span class="font-semibold text-base">Study Mode</span>
+                <button id="study-mode-toggle-desktop" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-600">
+                  <span class="sr-only">Toggle Study Mode</span>
+                  <span id="study-mode-switch-desktop" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1"></span>
+                </button>
+              </div>
+              <div class="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
+                <span class="font-semibold text-base">Timed Mode</span>
+                <button id="timed-mode-toggle-desktop" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-cyan-500">
+                  <span class="sr-only">Toggle Timed Mode</span>
+                  <span id="timed-mode-switch-desktop" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-6"></span>
                 </button>
               </div>
             </div>
           </div>
-          
-          <div id="game-info-panel" class="w-full">
-            <!-- Game info will be rendered here by JavaScript -->
+          <div id="game-info-panel-desktop" class="w-full">
+            <!-- Desktop game info will be rendered here -->
           </div>
-    
           <div class="w-full">
             <h3 class="text-lg font-bold mb-1 text-center text-yellow-400 border-t border-slate-700 pt-2">High Score</h3>
-            <p id="high-score" class="text-2xl sm:text-3xl font-bold text-center text-white">0 <span class="text-base font-normal text-slate-400">pts</span></p>
+            <p id="high-score-desktop" class="text-3xl font-bold text-center text-white">0 <span class="text-base font-normal text-slate-400">pts</span></p>
           </div>
         </aside>
-        <div class="flex-1 flex flex-col items-center p-2 sm:p-4 relative">
-          <header class="absolute top-2 sm:top-4 text-center w-full flex justify-center items-center px-4 z-10 pointer-events-none">
-            <div>
-              <p class="text-slate-400 mt-1 text-center text-sm sm:text-lg">Can you find the correct country on the map?</p>
-            </div>
-          </header>
-          <div class="w-full flex-1 flex items-center justify-center pt-10 sm:pt-12">
-            <div id="map-container" class="w-full h-full bg-slate-800 rounded-lg overflow-hidden shadow-lg border border-slate-700 relative">
-                <svg id="world-map" width="100%" height="100%" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
-                <div class="absolute bottom-4 right-4 flex flex-col space-y-2 z-10">
-                    <button id="zoom-in" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom in">+</button>
-                    <button id="zoom-out" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom out">-</button>
+
+        <!-- Main content area -->
+        <div class="flex-1 flex flex-col h-full w-full overflow-hidden">
+            <!-- Mobile Header (visible on mobile) -->
+            <header id="mobile-header" class="md:hidden flex items-center justify-between px-3 py-2 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 z-10">
+                <button id="open-sidebar-btn" class="p-2 -ml-2 text-slate-300" aria-label="Open menu">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div id="mobile-header-content" class="text-center">
+                    <!-- Mobile prompt/status rendered here -->
+                </div>
+                <div class="w-6"></div> <!-- Spacer -->
+            </header>
+
+            <!-- Desktop Header (visible on md+) -->
+            <header class="hidden md:flex md:items-center md:justify-center md:py-4 md:px-6 md:border-b md:border-slate-700">
+              <p class="text-slate-400 text-center text-lg">Can you find the correct country on the map?</p>
+            </header>
+            
+            <!-- Map Container (scrollable on mobile) -->
+            <div class="flex-1 relative overflow-y-auto md:overflow-hidden md:p-4">
+                <div id="map-container" class="w-full h-full min-h-[550px] md:min-h-0 bg-slate-800 md:rounded-lg md:shadow-lg md:border md:border-slate-700 relative flex items-center justify-center">
+                    <svg id="world-map" width="100%" height="100%" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
+                    <div class="absolute bottom-4 right-4 flex flex-col space-y-2 z-10">
+                        <button id="zoom-in" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom in">+</button>
+                        <button id="zoom-out" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom out">-</button>
+                    </div>
                 </div>
             </div>
-          </div>
-          <footer class="text-center text-slate-500 text-sm py-1">
-            Made with <span class="text-red-500" role="img" aria-label="love">❤️</span> by Ankit
-          </footer>
+
+            <!-- Mobile Footer (visible on mobile) -->
+            <footer id="mobile-game-footer" class="md:hidden bg-slate-800 p-2 border-t border-slate-700 shadow-lg z-10">
+                <!-- Mobile game stats and actions rendered here -->
+            </footer>
+
+            <footer class="hidden md:block text-center text-slate-500 text-sm py-2 border-t border-slate-700">
+              Made with <span class="text-red-500" role="img" aria-label="love">❤️</span> by Ankit
+            </footer>
         </div>
     </main>
     <script type="module">
@@ -116,117 +167,106 @@
         let correctGuessId = null;
         let timerId = null;
         
-        // --- D3 Map State ---
         let projection, pathGenerator, zoomBehavior;
         let currentTransform = zoomIdentity;
         let marker = null;
 
         // --- DOM Element References ---
-        const gameInfoPanel = document.getElementById('game-info-panel');
-        const highScoreEl = document.getElementById('high-score');
-        const mapContainer = document.getElementById('map-container');
+        const gameInfoPanelDesktop = document.getElementById('game-info-panel-desktop');
+        const mobileHeaderContent = document.getElementById('mobile-header-content');
+        const mobileGameFooter = document.getElementById('mobile-game-footer');
+        const mobileSidebarFooter = document.getElementById('mobile-sidebar-footer');
+        const highScoreDesktopEl = document.getElementById('high-score-desktop');
         const svg = select('#world-map');
         const g = svg.append('g');
 
-        // --- UI Update Functions ---
+        // --- UI Rendering ---
+        function attachButtonListeners() {
+            document.querySelectorAll('.play-again-btn').forEach(btn => btn.addEventListener('click', () => startGame(countries)));
+            document.querySelectorAll('.hint-btn').forEach(btn => btn.addEventListener('click', handleHintClick));
+        }
+        
         function renderGameInfo() {
+            renderDesktopInfo();
+            renderMobileInfo();
+            attachButtonListeners();
+        }
+
+        function renderDesktopInfo() {
             let content = '';
             if (gameStatus === GameStatus.LOADING) {
-                content = `
-                    <div class="text-center">
-                        <h2 class="text-2xl font-bold">Loading Map...</h2>
-                        <p class="text-slate-400">Getting the globe ready!</p>
-                    </div>`;
+                content = `<div class="text-center"><h2 class="text-2xl font-bold">Loading Map...</h2><p class="text-slate-400">Getting the globe ready!</p></div>`;
             } else if (gameStatus === GameStatus.GAME_OVER) {
-                content = `
-                    <div class="w-full flex flex-col space-y-4 text-center animate-fade-in">
-                        <h2 class="text-3xl font-extrabold text-red-500">Game Over</h2>
-                        ${targetCountry && !correctGuessId ? `<p class="text-lg">The country was <span class="font-bold text-green-400">${targetCountry.properties.name}</span>.</p>` : ''}
-                        <div>
-                            <p class="text-lg text-slate-400">Final Score</p>
-                            <p class="text-4xl font-bold">${score}</p>
-                        </div>
-                        <button id="play-again-btn" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg">
-                            Play Again
-                        </button>
-                    </div>`;
+                content = `<div class="w-full flex flex-col space-y-4 text-center animate-fade-in"><h2 class="text-3xl font-extrabold text-red-500">Game Over</h2>${targetCountry && !correctGuessId ? `<p class="text-lg">The country was <span class="font-bold text-green-400">${targetCountry.properties.name}</span>.</p>` : ''}<div><p class="text-lg text-slate-400">Final Score</p><p class="text-4xl font-bold">${score}</p></div><button class="play-again-btn px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg">Play Again</button></div>`;
             } else if (gameMode === 'STUDY') {
-                content = `
-                    <div class="w-full flex flex-col space-y-4 text-center">
-                        <h2 class="text-3xl font-bold text-cyan-400">Study Mode</h2>
-                        <p class="text-slate-400">Explore the labeled world map. Zoom and pan to learn country names and locations.</p>
-                    </div>`;
-            } else { // Playing mode
-                const hearts = Array.from({ length: 3 }).map((_, i) =>
-                    `<svg class="w-7 h-7 ${i < lives ? 'text-red-500' : 'text-slate-600'} transition-colors" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`
-                ).join('');
-                const timerClass = timeLeft < 10 && isTimedMode ? 'text-red-500 animate-pulse' : 'text-white';
+                content = `<div class="w-full flex flex-col space-y-4 text-center"><h2 class="text-3xl font-bold text-cyan-400">Study Mode</h2><p class="text-slate-400">Explore the labeled world map.</p></div>`;
+            } else {
+                const hearts = Array.from({ length: 3 }).map((_, i) => `<svg class="w-7 h-7 ${i < lives ? 'text-red-500' : 'text-slate-600'} transition-colors" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`).join('');
+                const timerClass = timeLeft < 10 && isTimedMode ? 'text-red-500 critical-time' : 'text-white';
+                content = `<div class="w-full flex flex-col space-y-2 text-center"><p class="text-base text-slate-400">Find this country:</p><h2 class="text-3xl font-bold text-cyan-400 break-words h-20 flex items-center justify-center" title="${targetCountry?.properties.name || ''}">${targetCountry?.properties.name || '...'}</h2><p id="feedback-message" class="text-sm text-yellow-400 h-6"></p>${isTimedMode ? `<div><p class="text-base text-slate-400">Time Left</p><p id="timer" class="text-4xl font-bold transition-colors ${timerClass}">${timeLeft}</p></div>` : ''}<div class="flex justify-around items-center w-full"><div><p class="text-base text-slate-400">Lives</p><div class="flex justify-center space-x-1 mt-1">${hearts}</div></div><div><p class="text-base text-slate-400">Streak</p><p class="text-2xl font-bold">${streak} 🔥</p></div></div><div><p class="text-base text-slate-400">Score</p><p class="text-4xl font-bold">${score}</p></div><button class="hint-btn w-full px-5 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors shadow-md disabled:bg-slate-700 disabled:cursor-not-allowed" ${hintsLeft <= 0 || !!correctGuessId || !!revealedHintCountryId ? 'disabled' : ''}>Hint (${hintsLeft})</button></div>`;
+            }
+            gameInfoPanelDesktop.innerHTML = content;
+        }
+        
+        function renderMobileInfo() {
+            let headerContent = '', footerContent = '';
+            
+            // High score in sidebar
+            mobileSidebarFooter.innerHTML = `<div class="w-full"><h3 class="text-lg font-bold mb-1 text-center text-yellow-400 border-t border-slate-700 pt-2">High Score</h3><p id="high-score-mobile" class="text-3xl font-bold text-center text-white">${highScore} <span class="text-base font-normal text-slate-400">pts</span></p></div>`;
+            
+            if (gameStatus === GameStatus.LOADING) {
+                headerContent = `<h2 class="text-lg font-bold">Loading...</h2>`;
+            } else if (gameStatus === GameStatus.GAME_OVER) {
+                headerContent = `<h2 class="text-xl font-extrabold text-red-500">Game Over</h2>`;
+                footerContent = `<div class="w-full flex flex-col items-center gap-2 text-center animate-fade-in">${targetCountry && !correctGuessId ? `<p>The country was <span class="font-bold text-green-400">${targetCountry.properties.name}</span>.</p>` : ''}<p class="text-lg text-slate-400">Final Score: <span class="text-2xl font-bold text-white">${score}</span></p><button class="play-again-btn w-full max-w-xs px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-500 transition-colors shadow-lg">Play Again</button></div>`;
+            } else if (gameMode === 'STUDY') {
+                headerContent = `<h2 class="text-lg font-bold text-cyan-400">Study Mode</h2>`;
+                footerContent = `<p class="text-center text-slate-400 text-sm">Zoom and pan to explore the map.</p>`;
+            } else { // Playing
+                const hearts = Array.from({ length: 3 }).map((_, i) => `<svg class="w-6 h-6 ${i < lives ? 'text-red-500' : 'text-slate-600'} transition-colors" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`).join('');
+                headerContent = `<div class="text-center"><p class="text-sm text-slate-400">Find:</p><h2 class="text-lg font-bold text-cyan-400 leading-tight break-words" title="${targetCountry?.properties.name || ''}">${targetCountry?.properties.name || '...'}</h2><p id="feedback-message-mobile" class="text-xs text-yellow-400 h-4"></p></div>`;
+
+                const timerClass = timeLeft < 10 && isTimedMode ? 'text-red-500 critical-time' : 'text-white';
+                const timerHTML = isTimedMode ? `<div class="text-center"><div class="text-xs text-slate-400">Time</div><div class="font-bold text-xl ${timerClass}" id="timer-mobile">${timeLeft}</div></div>` : '';
                 
-                content = `
-                    <div class="w-full flex flex-col space-y-2 text-center">
-                        <div>
-                            <p class="text-base text-slate-400">Find this country:</p>
-                            <h2 class="text-xl md:text-3xl font-bold text-cyan-400 break-words min-h-[4rem] md:h-20 flex items-center justify-center" title="${targetCountry?.properties.name || ''}">${targetCountry?.properties.name || '...'}</h2>
-                            <p id="feedback-message" class="text-sm text-yellow-400 h-6"></p>
-                        </div>
-                        ${isTimedMode ? `
-                        <div>
-                            <p class="text-base text-slate-400">Time Left</p>
-                            <p id="timer" class="text-2xl sm:text-4xl font-bold transition-colors ${timerClass}">${timeLeft}</p>
-                        </div>` : ''}
-                        <div class="flex justify-around items-center w-full">
-                            <div>
-                                <p class="text-base text-slate-400">Lives</p>
-                                <div class="flex justify-center space-x-1 mt-1">${hearts}</div>
-                            </div>
-                            <div>
-                                <p class="text-base text-slate-400">Streak</p>
-                                <p class="text-2xl font-bold">${streak} 🔥</p>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="text-base text-slate-400">Score</p>
-                            <p class="text-2xl sm:text-4xl font-bold">${score}</p>
-                        </div>
-                        <button id="hint-btn" ${hintsLeft <= 0 || !!correctGuessId || !!revealedHintCountryId ? 'disabled' : ''} class="px-5 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors shadow-md disabled:bg-slate-700 disabled:cursor-not-allowed">
-                            Hint (${hintsLeft})
-                        </button>
-                    </div>`;
+                footerContent = `<div class="grid grid-cols-5 items-center gap-1">
+                    ${timerHTML ? timerHTML : `<div class="text-center"><div class="text-xs text-slate-400">Score</div><div class="font-bold text-xl">${score}</div></div>`}
+                    ${timerHTML && `<div class="text-center"><div class="text-xs text-slate-400">Score</div><div class="font-bold text-xl">${score}</div></div>`}
+                    <div class="text-center"><div class="text-xs text-slate-400">Lives</div><div class="flex justify-center space-x-1">${hearts}</div></div>
+                    <div class="text-center"><div class="text-xs text-slate-400">Streak</div><div class="font-bold text-xl">${streak}🔥</div></div>
+                    <button class="hint-btn col-span-1 text-sm h-10 bg-teal-600 font-bold rounded-md hover:bg-teal-500 disabled:bg-slate-700 disabled:cursor-not-allowed" ${hintsLeft <= 0 || !!correctGuessId || !!revealedHintCountryId ? 'disabled' : ''}>Hint<br/>(${hintsLeft})</button>
+                </div>`;
             }
-            gameInfoPanel.innerHTML = content;
-            if (gameStatus === GameStatus.GAME_OVER) {
-                document.getElementById('play-again-btn').addEventListener('click', () => startGame());
-            }
-            if (gameStatus === GameStatus.PLAYING && gameMode === 'PLAY') {
-                document.getElementById('hint-btn').addEventListener('click', handleHintClick);
-            }
+            mobileHeaderContent.innerHTML = headerContent;
+            mobileGameFooter.innerHTML = footerContent;
         }
         
         function updateFeedbackMessage(message) {
-            const el = document.getElementById('feedback-message');
-            if (el) el.textContent = message;
+            document.querySelectorAll('#feedback-message, #feedback-message-mobile').forEach(el => {
+                if(el) el.textContent = message;
+            });
         }
 
         function updateHighScore() {
-            highScoreEl.innerHTML = `${highScore} <span class="text-base font-normal text-slate-400">pts</span>`;
+            highScoreDesktopEl.innerHTML = `${highScore} <span class="text-base font-normal text-slate-400">pts</span>`;
+            const mobileEl = document.getElementById('high-score-mobile');
+            if (mobileEl) mobileEl.innerHTML = `${highScore} <span class="text-base font-normal text-slate-400">pts</span>`;
         }
         
-        // --- Map Rendering ---
         function renderMap() {
             const getFillColor = (d) => {
-                let colorClass = 'fill-slate-700 hover:fill-slate-600';
                 if (gameMode === 'PLAY') {
                     if (d.id === correctGuessId) return 'fill-green-500';
                     if (gameStatus === GameStatus.PLAYING) {
-                        if (wrongGuesses.includes(d.id)) return 'fill-red-500';
+                        if (wrongGuesses.includes(d.id)) return 'fill-red-500/80';
                         if (d.id === selectedCountryId) return 'fill-yellow-500';
-                        if (d.id === revealedHintCountryId) return 'fill-green-500';
+                        if (d.id === revealedHintCountryId) return 'fill-green-500/80';
                     } else if (gameStatus === GameStatus.GAME_OVER) {
                         if (d.id === targetCountry.id) return 'fill-green-500';
                         if (wrongGuesses.includes(d.id) || (d.id === selectedCountryId && d.id !== targetCountry.id)) return 'fill-red-500';
                     }
                 }
-                return colorClass;
+                return 'fill-slate-700 hover:fill-slate-600';
             };
 
             g.selectAll('path').data(countries, d => d.id)
@@ -234,7 +274,6 @@
                 .attr('d', pathGenerator)
                 .attr('class', d => `${getFillColor(d)} stroke-slate-500 stroke-[0.5] transition-colors duration-300`);
 
-            // Labels for Study Mode
             g.selectAll('text').remove();
             if (gameMode === 'STUDY') {
                 g.selectAll('text').data(countries).enter()
@@ -242,8 +281,7 @@
                     .attr('x', d => pathGenerator.centroid(d)[0])
                     .attr('y', d => pathGenerator.centroid(d)[1])
                     .text(d => d.properties.name)
-                    .attr('text-anchor', 'middle')
-                    .attr('dominant-baseline', 'middle')
+                    .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
                     .attr('class', 'fill-white/90 font-semibold pointer-events-none')
                     .style('font-size', d => {
                         const area = pathGenerator.area(d);
@@ -251,24 +289,15 @@
                         const fontSize = Math.min(8 / currentTransform.k, area / 100);
                         return fontSize < 1.0 ? '0px' : `${fontSize}px`;
                     })
-                    .style('stroke', 'rgba(0,0,0,0.5)')
-                    .style('stroke-width', 0.2);
+                    .style('stroke', 'rgba(0,0,0,0.5)').style('stroke-width', 0.2);
             }
 
-            // Marker
             g.selectAll('circle.marker').remove();
             if (marker && gameStatus === GameStatus.PLAYING) {
-                g.append('circle')
-                    .attr('cx', marker.x)
-                    .attr('cy', marker.y)
-                    .attr('r', 5 / currentTransform.k)
-                    .attr('class', 'marker fill-blue-400 stroke-white pointer-events-none')
-                    .style('stroke-width', 2 / currentTransform.k);
+                g.append('circle').attr('cx', marker.x).attr('cy', marker.y).attr('r', 5 / currentTransform.k)
+                    .attr('class', 'marker fill-blue-400 stroke-white pointer-events-none').style('stroke-width', 2 / currentTransform.k);
             }
-
-            // Update cursor
-            const cursor = gameMode === 'STUDY' ? 'cursor-grab' : (gameStatus === GameStatus.PLAYING ? 'cursor-crosshair' : 'cursor-default');
-            svg.style('cursor', cursor);
+            svg.style('cursor', gameMode === 'STUDY' ? 'cursor-grab' : (gameStatus === GameStatus.PLAYING ? 'cursor-crosshair' : 'cursor-default'));
         }
 
         // --- Game Logic ---
@@ -313,7 +342,7 @@
                 wrongGuesses = [];
                 correctGuessId = null;
                 revealedHintCountryId = null;
-                marker = null; // Clear marker for new round
+                marker = null;
                 resetTimer();
                 renderGameInfo();
                 renderMap();
@@ -324,22 +353,13 @@
 
         function handleRoundFailure(message) {
             if (!targetCountry) return;
-            
             streak = 0;
             lives -= 1;
             correctGuessId = targetCountry.id;
             updateFeedbackMessage(message);
-            
             renderMap();
             renderGameInfo();
-
-            setTimeout(() => {
-                if (lives > 0) {
-                    selectNewCountry();
-                } else {
-                    gameOver();
-                }
-            }, 2500);
+            setTimeout(() => { if (lives > 0) { selectNewCountry(); } else { gameOver(); } }, 2500);
         }
 
         function gameOver() {
@@ -356,15 +376,8 @@
         
         function handleCountryGuess(guessedCountry) {
             if (gameStatus !== GameStatus.PLAYING || !targetCountry || correctGuessId) return;
-            
-            if (!guessedCountry) {
-                selectedCountryId = null;
-                renderMap();
-                return;
-            }
-            
+            if (!guessedCountry) { selectedCountryId = null; renderMap(); return; }
             selectedCountryId = guessedCountry.id;
-            
             if (guessedCountry.id === targetCountry.id) {
                 clearTimeout(timerId);
                 score++;
@@ -375,29 +388,23 @@
                 renderMap();
                 setTimeout(selectNewCountry, 1500);
             } else {
-                if (wrongGuesses.includes(guessedCountry.id)) {
-                    renderMap();
-                    return;
-                }
-                
+                if (wrongGuesses.includes(guessedCountry.id)) { renderMap(); return; }
                 wrongGuesses.push(guessedCountry.id);
-                const message = `Incorrect. The answer was ${targetCountry.properties.name}.`;
                 clearTimeout(timerId);
-                handleRoundFailure(message);
+                handleRoundFailure(`Incorrect. The answer was ${targetCountry.properties.name}.`);
             }
         }
         
         function handleHintClick() {
             if (!targetCountry || hintsLeft <= 0 || revealedHintCountryId || correctGuessId) return;
-            
             if (targetCountry.id) {
               revealedHintCountryId = targetCountry.id;
-              updateFeedbackMessage('Hint used! The correct country is highlighted in green.');
+              updateFeedbackMessage('Hint used! Country is now highlighted.');
               setTimeout(() => {
-                const el = document.getElementById('feedback-message');
-                if (el && el.textContent === 'Hint used! The correct country is highlighted in green.') {
-                    el.textContent = '';
-                }
+                const feedbackEls = document.querySelectorAll('#feedback-message, #feedback-message-mobile');
+                feedbackEls.forEach(el => {
+                   if (el && el.textContent === 'Hint used! Country is now highlighted.') el.textContent = '';
+                });
               }, 2500);
             }
             hintsLeft--;
@@ -408,24 +415,19 @@
         // --- Timer Logic ---
         function resetTimer() {
             timeLeft = 60;
-            if (isTimedMode && gameStatus === GameStatus.PLAYING) {
-                countdown();
-            }
+            if (isTimedMode && gameStatus === GameStatus.PLAYING) countdown();
         }
 
         function countdown() {
-            if (!isTimedMode || gameStatus !== GameStatus.PLAYING || gameMode !== 'PLAY' || correctGuessId) {
-                return;
-            }
+            if (!isTimedMode || gameStatus !== GameStatus.PLAYING || gameMode !== 'PLAY' || correctGuessId) return;
             timerId = setTimeout(() => {
                 timeLeft--;
-                const timerEl = document.getElementById('timer');
-                if (timerEl) {
-                    timerEl.textContent = timeLeft;
-                    if (timeLeft < 10) {
-                        timerEl.classList.add('text-red-500', 'animate-pulse');
-                    }
-                }
+                document.querySelectorAll('#timer, #timer-mobile').forEach(el => {
+                  if(el) {
+                    el.textContent = timeLeft;
+                    if(timeLeft < 10) el.classList.add('text-red-500', 'critical-time'); else el.classList.remove('text-red-500', 'critical-time');
+                  }
+                });
                 if (timeLeft <= 0) {
                     handleRoundFailure(`Time's up! The answer was ${targetCountry?.properties.name}.`);
                 } else {
@@ -437,95 +439,108 @@
         // --- Event Handlers ---
         function handleMapClick(event) {
             if (gameMode !== 'PLAY' || gameStatus !== GameStatus.PLAYING) return;
-            
             const [svgX, svgY] = pointer(event, svg.node());
             const [transformedX, transformedY] = currentTransform.invert([svgX, svgY]);
             marker = { x: transformedX, y: transformedY };
-            
             const coords = projection.invert([transformedX, transformedY]);
-            
-            if (coords) {
-                const clickedCountry = countries.find(c => c.geometry && geoContains(c, coords));
-                handleCountryGuess(clickedCountry || null);
-            } else {
-                handleCountryGuess(null);
-            }
+            const clickedCountry = coords ? countries.find(c => c.geometry && geoContains(c, coords)) : null;
+            handleCountryGuess(clickedCountry);
+        }
+
+        function setupModeToggles() {
+            const toggles = [
+              { id: 'study-mode-toggle', type: 'study' },
+              { id: 'timed-mode-toggle', type: 'timed' }
+            ];
+            ['desktop', 'mobile'].forEach(view => {
+              toggles.forEach(t => {
+                const btn = document.getElementById(`${t.id}-${view}`);
+                const switchEl = document.getElementById(`${t.type}-mode-switch-${view}`);
+                if (!btn || !switchEl) return;
+
+                if (t.type === 'study') {
+                  btn.addEventListener('click', () => {
+                      gameMode = gameMode === 'PLAY' ? 'STUDY' : 'PLAY';
+                      const isStudy = gameMode === 'STUDY';
+                      document.querySelectorAll('[id^=study-mode-toggle]').forEach(b => {
+                        b.classList.toggle('bg-cyan-500', isStudy);
+                        b.classList.toggle('bg-gray-600', !isStudy);
+                      });
+                      document.querySelectorAll('[id^=study-mode-switch]').forEach(s => {
+                        s.classList.toggle('translate-x-6', isStudy);
+                        s.classList.toggle('translate-x-1', !isStudy);
+                      });
+                      if (isStudy) clearTimeout(timerId); else startGame(countries);
+                      renderGameInfo(); renderMap();
+                  });
+                } else { // timed
+                  btn.addEventListener('click', () => {
+                      isTimedMode = !isTimedMode;
+                      document.querySelectorAll('[id^=timed-mode-toggle]').forEach(b => {
+                        b.classList.toggle('bg-cyan-500', isTimedMode);
+                        b.classList.toggle('bg-gray-600', !isTimedMode);
+                      });
+                      document.querySelectorAll('[id^=timed-mode-switch]').forEach(s => {
+                        s.classList.toggle('translate-x-6', isTimedMode);
+                        s.classList.toggle('translate-x-1', !isTimedMode);
+                      });
+                      startGame(countries);
+                  });
+                }
+              });
+            });
         }
         
         // --- Initialization ---
         async function init() {
-            // Load high score
             const storedScore = localStorage.getItem('countryGuesserHighScore');
-            if (storedScore) {
-                highScore = parseInt(storedScore, 10);
-                updateHighScore();
-            }
+            if (storedScore) { highScore = parseInt(storedScore, 10); }
+            updateHighScore();
 
-            // Set up D3
             projection = geoMercator().scale(150).translate([800 / 2, 450 / 2]);
             pathGenerator = geoPath().projection(projection);
 
-            zoomBehavior = zoom()
-                .scaleExtent([1, 10])
-                .on('zoom', (event) => {
-                    currentTransform = event.transform;
-                    g.attr('transform', currentTransform);
-                    renderMap();
-                });
+            zoomBehavior = zoom().scaleExtent([1, 10]).on('zoom', (event) => {
+                currentTransform = event.transform;
+                g.attr('transform', currentTransform);
+                renderMap();
+            });
             
-            svg.call(zoomBehavior);
-            svg.on('dblclick.zoom', null); // Disable double-click zoom
+            svg.call(zoomBehavior).on('dblclick.zoom', null);
 
-            // Attach event listeners
             document.getElementById('zoom-in').addEventListener('click', () => svg.transition().call(zoomBehavior.scaleBy, 1.5));
             document.getElementById('zoom-out').addEventListener('click', () => svg.transition().call(zoomBehavior.scaleBy, 0.75));
             svg.on('click', handleMapClick);
+            setupModeToggles();
 
-            document.getElementById('study-mode-toggle').addEventListener('click', () => {
-                gameMode = gameMode === 'PLAY' ? 'STUDY' : 'PLAY';
-                const button = document.getElementById('study-mode-toggle');
-                const switchEl = document.getElementById('study-mode-switch');
-                if (gameMode === 'STUDY') {
-                    button.classList.replace('bg-gray-600', 'bg-cyan-500');
-                    switchEl.classList.replace('translate-x-1', 'translate-x-6');
-                    clearTimeout(timerId);
-                } else {
-                    button.classList.replace('bg-cyan-500', 'bg-gray-600');
-                    switchEl.classList.replace('translate-x-6', 'translate-x-1');
-                    startGame();
-                }
-                renderGameInfo();
-                renderMap();
-            });
+            // Mobile sidebar logic
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const openBtn = document.getElementById('open-sidebar-btn');
+            const closeBtn = document.getElementById('close-sidebar-btn');
+            
+            const openSidebar = () => {
+              sidebar.classList.remove('-translate-x-full');
+              overlay.classList.remove('hidden');
+            };
+            const closeSidebar = () => {
+              sidebar.classList.add('-translate-x-full');
+              overlay.classList.add('hidden');
+            };
 
-            document.getElementById('timed-mode-toggle').addEventListener('click', () => {
-                isTimedMode = !isTimedMode;
-                const button = document.getElementById('timed-mode-toggle');
-                const switchEl = document.getElementById('timed-mode-switch');
-                if (isTimedMode) {
-                    button.classList.replace('bg-gray-600', 'bg-cyan-500');
-                    switchEl.classList.replace('translate-x-1', 'translate-x-6');
-                } else {
-                    button.classList.replace('bg-cyan-500', 'bg-gray-600');
-                    switchEl.classList.replace('translate-x-6', 'translate-x-1');
-                }
-                startGame();
-            });
-
-            // Fetch map data and start game
+            openBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            
             try {
                 renderGameInfo();
-                const response = await fetch(WORLD_MAP_URL);
-                if (!response.ok) throw new Error('Failed to fetch map data');
-                const worldData = await response.json();
-                
-                const countriesGeoJSON = feature(worldData, worldData.objects.countries);
-                countries = countriesGeoJSON.features.filter(c => c.properties.name && c.id !== '010');
-                
+                const worldData = await (await fetch(WORLD_MAP_URL)).json();
+                countries = feature(worldData, worldData.objects.countries).features.filter(c => c.properties.name && c.id !== '010');
                 startGame(countries);
             } catch (error) {
                 console.error('Error loading map data:', error);
-                gameInfoPanel.innerHTML = `<div class="text-center text-red-500">Failed to load map data. Please refresh the page.</div>`;
+                gameInfoPanelDesktop.innerHTML = `<div class="text-center text-red-500">Failed to load map. Please refresh.</div>`;
+                mobileHeaderContent.innerHTML = `<div class="text-center text-red-500">Map Load Error</div>`;
             }
         }
 
