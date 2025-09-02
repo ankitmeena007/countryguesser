@@ -17,6 +17,15 @@
       }
     </script>
     <style>
+        :root {
+            --app-height: 100vh;
+        }
+        body {
+            height: var(--app-height);
+        }
+        main {
+            height: 100%;
+        }
         /* Add a simple fade-in animation */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -39,7 +48,7 @@
         }
     </style>
   </head>
-  <body class="bg-slate-900 text-white antialiased h-screen overflow-hidden">
+  <body class="bg-slate-900 text-white antialiased overflow-hidden">
     <!-- Mobile Sidebar (Off-canvas) -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden"></div>
     <aside id="mobile-sidebar" class="fixed top-0 left-0 h-full w-72 bg-slate-800 shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out p-6 flex flex-col md:hidden">
@@ -72,7 +81,7 @@
         </div>
     </aside>
 
-    <main class="w-screen h-screen flex flex-row font-sans">
+    <main class="w-screen flex flex-row font-sans">
         <!-- Desktop Sidebar (visible on md+) -->
         <aside class="hidden md:flex md:w-72 md:flex-shrink-0 bg-slate-800 p-6 flex-col justify-between border-r border-slate-700 shadow-2xl">
           <div>
@@ -143,6 +152,13 @@
         </div>
     </main>
     <script type="module">
+        // --- Mobile viewport height fix ---
+        const setAppHeight = () => {
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+        };
+        window.addEventListener('resize', setAppHeight);
+        setAppHeight();
+        
         import { feature } from 'topojson-client';
         import { geoMercator, geoPath, geoContains } from 'd3-geo';
         import { zoom, zoomIdentity } from 'd3-zoom';
