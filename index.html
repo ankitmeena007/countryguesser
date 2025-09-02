@@ -134,7 +134,7 @@
             <div class="flex-1 relative overflow-y-auto md:overflow-hidden md:p-4">
                 <div id="map-container" class="w-full h-full min-h-[550px] md:min-h-0 bg-slate-800 md:rounded-lg md:shadow-lg md:border md:border-slate-700 relative flex items-center justify-center">
                     <svg id="world-map" width="100%" height="100%" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
-                    <div class="absolute bottom-16 md:bottom-4 right-4 flex flex-col space-y-2 z-10">
+                    <div class="absolute bottom-20 md:bottom-4 right-4 flex flex-col space-y-2 z-10">
                         <button id="zoom-in" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom in">+</button>
                         <button id="zoom-out" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom out">-</button>
                     </div>
@@ -274,13 +274,32 @@
         
         // --- Map Rendering (Optimized) ---
         function updateStudyLabelStyles(k) {
-            g.selectAll('text.country-label')
-                .style('font-size', d => {
-                    const area = pathGenerator.area(d);
-                    if (area * k < 2) return '0px';
-                    const fontSize = Math.min(8 / k, area / 100);
-                    return fontSize < 1.0 ? '0px' : `${fontSize}px`;
-                });
+            const labels = g.selectAll('text.country-label');
+            const effectiveZoom = Math.sqrt(k);
+
+            labels.style('font-size', d => {
+                const bounds = pathGenerator.bounds(d);
+                const width = bounds[1][0] - bounds[0][0];
+                const nameLength = d.properties.name.length;
+
+                if (nameLength === 0) return '0px';
+
+                // Heuristic to calculate a font size that aims for the text to fill
+                // a significant portion of the country's width.
+                let sizeFromWidth = (width * 1.25) / nameLength;
+
+                // For small/narrow countries, this can be tiny. We need a readable minimum.
+                // This minimum can be larger than the country itself, as requested.
+                const absoluteMinSize = 4.0;
+                const absoluteMaxSize = 20.0; // Cap the font size for very large countries.
+                
+                // Use the larger of the calculated size or the absolute minimum, but cap at max size.
+                const unscaledFontSize = Math.min(Math.max(sizeFromWidth, absoluteMinSize), absoluteMaxSize);
+                
+                // Apply zoom scaling so text appears to grow when zooming in.
+                return `${unscaledFontSize / effectiveZoom}px`;
+            })
+            .style('stroke-width', `${0.3 / effectiveZoom}px`);
         }
 
         function updateMap() {
@@ -403,10 +422,11 @@
             selectedCountryId = guessedCountry.id;
             if (guessedCountry.id === targetCountry.id) {
                 clearTimeout(timerId);
-                score++;
+                const pointsAwarded = 1 + streak;
+                score += pointsAwarded;
                 streak++;
                 correctGuessId = guessedCountry.id;
-                updateFeedbackMessage(`Correct! It's ${guessedCountry.properties.name}.`);
+                updateFeedbackMessage(`+${pointsAwarded} points! Correct! It's ${guessedCountry.properties.name}.`);
                 renderGameInfo();
                 updateMap();
                 setTimeout(selectNewCountry, 1500);
@@ -549,8 +569,7 @@
                 .attr('dominant-baseline', 'middle')
                 .attr('class', 'country-label fill-white/90 font-semibold pointer-events-none')
                 .style('display', 'none')
-                .style('stroke', 'rgba(0,0,0,0.5)')
-                .style('stroke-width', 0.2);
+                .style('stroke', 'rgba(0,0,0,0.5)');
 
             g.append('circle')
                 .attr('class', 'marker fill-blue-400 stroke-white pointer-events-none')
