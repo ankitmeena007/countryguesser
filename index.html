@@ -33,6 +33,10 @@
         .critical-time {
             animation: pulse 1s infinite;
         }
+        /* Performance optimization for the map container */
+        #map-container {
+            contain: strict;
+        }
     </style>
   </head>
   <body class="bg-slate-900 text-white antialiased h-screen overflow-hidden">
@@ -211,7 +215,6 @@
         function renderMobileInfo() {
             let headerContent = '', footerContent = '';
             
-            // High score in sidebar
             mobileSidebarFooter.innerHTML = `<div class="w-full"><h3 class="text-lg font-bold mb-1 text-center text-yellow-400 border-t border-slate-700 pt-2">High Score</h3><p id="high-score-mobile" class="text-3xl font-bold text-center text-white">${highScore} <span class="text-base font-normal text-slate-400">pts</span></p></div>`;
             
             if (gameStatus === GameStatus.LOADING) {
@@ -253,7 +256,18 @@
             if (mobileEl) mobileEl.innerHTML = `${highScore} <span class="text-base font-normal text-slate-400">pts</span>`;
         }
         
-        function renderMap() {
+        // --- Map Rendering (Optimized) ---
+        function updateStudyLabelStyles(k) {
+            g.selectAll('text.country-label')
+                .style('font-size', d => {
+                    const area = pathGenerator.area(d);
+                    if (area * k < 2) return '0px';
+                    const fontSize = Math.min(8 / k, area / 100);
+                    return fontSize < 1.0 ? '0px' : `${fontSize}px`;
+                });
+        }
+
+        function updateMap() {
             const getFillColor = (d) => {
                 if (gameMode === 'PLAY') {
                     if (d.id === correctGuessId) return 'fill-green-500';
@@ -269,35 +283,28 @@
                 return 'fill-slate-700 hover:fill-slate-600';
             };
 
-            g.selectAll('path').data(countries, d => d.id)
-                .join('path')
-                .attr('d', pathGenerator)
+            g.selectAll('path')
                 .attr('class', d => `${getFillColor(d)} stroke-slate-500 stroke-[0.5] transition-colors duration-300`);
 
-            g.selectAll('text').remove();
-            if (gameMode === 'STUDY') {
-                g.selectAll('text').data(countries).enter()
-                    .append('text')
-                    .attr('x', d => pathGenerator.centroid(d)[0])
-                    .attr('y', d => pathGenerator.centroid(d)[1])
-                    .text(d => d.properties.name)
-                    .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
-                    .attr('class', 'fill-white/90 font-semibold pointer-events-none')
-                    .style('font-size', d => {
-                        const area = pathGenerator.area(d);
-                        if (area * currentTransform.k < 2) return '0px';
-                        const fontSize = Math.min(8 / currentTransform.k, area / 100);
-                        return fontSize < 1.0 ? '0px' : `${fontSize}px`;
-                    })
-                    .style('stroke', 'rgba(0,0,0,0.5)').style('stroke-width', 0.2);
+            const markerEl = g.select('circle.marker');
+            if (marker && gameStatus === GameStatus.PLAYING) {
+                markerEl.attr('cx', marker.x)
+                    .attr('cy', marker.y)
+                    .attr('r', 5 / currentTransform.k)
+                    .style('stroke-width', `${2 / currentTransform.k}px`);
+            } else {
+                markerEl.attr('r', 0);
             }
 
-            g.selectAll('circle.marker').remove();
-            if (marker && gameStatus === GameStatus.PLAYING) {
-                g.append('circle').attr('cx', marker.x).attr('cy', marker.y).attr('r', 5 / currentTransform.k)
-                    .attr('class', 'marker fill-blue-400 stroke-white pointer-events-none').style('stroke-width', 2 / currentTransform.k);
+            const labels = g.selectAll('text.country-label');
+            if (gameMode === 'STUDY') {
+                labels.style('display', 'block');
+                updateStudyLabelStyles(currentTransform.k);
+            } else {
+                labels.style('display', 'none');
             }
-            svg.style('cursor', gameMode === 'STUDY' ? 'cursor-grab' : (gameStatus === GameStatus.PLAYING ? 'cursor-crosshair' : 'cursor-default'));
+            
+            svg.style('cursor', gameMode === 'STUDY' ? 'grab' : (gameStatus === GameStatus.PLAYING ? 'crosshair' : 'default'));
         }
 
         // --- Game Logic ---
@@ -329,7 +336,7 @@
             
             resetTimer();
             renderGameInfo();
-            renderMap();
+            updateMap();
         }
 
         function selectNewCountry() {
@@ -345,7 +352,7 @@
                 marker = null;
                 resetTimer();
                 renderGameInfo();
-                renderMap();
+                updateMap();
             } else {
                 gameOver();
             }
@@ -357,7 +364,7 @@
             lives -= 1;
             correctGuessId = targetCountry.id;
             updateFeedbackMessage(message);
-            renderMap();
+            updateMap();
             renderGameInfo();
             setTimeout(() => { if (lives > 0) { selectNewCountry(); } else { gameOver(); } }, 2500);
         }
@@ -371,12 +378,12 @@
                 updateHighScore();
             }
             renderGameInfo();
-            renderMap();
+            updateMap();
         }
         
         function handleCountryGuess(guessedCountry) {
             if (gameStatus !== GameStatus.PLAYING || !targetCountry || correctGuessId) return;
-            if (!guessedCountry) { selectedCountryId = null; renderMap(); return; }
+            if (!guessedCountry) { selectedCountryId = null; updateMap(); return; }
             selectedCountryId = guessedCountry.id;
             if (guessedCountry.id === targetCountry.id) {
                 clearTimeout(timerId);
@@ -385,10 +392,10 @@
                 correctGuessId = guessedCountry.id;
                 updateFeedbackMessage(`Correct! It's ${guessedCountry.properties.name}.`);
                 renderGameInfo();
-                renderMap();
+                updateMap();
                 setTimeout(selectNewCountry, 1500);
             } else {
-                if (wrongGuesses.includes(guessedCountry.id)) { renderMap(); return; }
+                if (wrongGuesses.includes(guessedCountry.id)) { updateMap(); return; }
                 wrongGuesses.push(guessedCountry.id);
                 clearTimeout(timerId);
                 handleRoundFailure(`Incorrect. The answer was ${targetCountry.properties.name}.`);
@@ -409,7 +416,7 @@
             }
             hintsLeft--;
             renderGameInfo();
-            renderMap();
+            updateMap();
         }
 
         // --- Timer Logic ---
@@ -437,6 +444,24 @@
         }
 
         // --- Event Handlers ---
+        function handleZoom(event) {
+            currentTransform = event.transform;
+            g.attr('transform', currentTransform);
+            
+            const k = currentTransform.k;
+            g.selectAll('path').style('stroke-width', `${0.5 / k}px`);
+            
+            const markerEl = g.select('circle.marker');
+            if (markerEl.attr('r') > 0) {
+                markerEl.attr('r', 5 / k)
+                        .style('stroke-width', `${2 / k}px`);
+            }
+
+            if (gameMode === 'STUDY') {
+                updateStudyLabelStyles(k);
+            }
+        }
+
         function handleMapClick(event) {
             if (gameMode !== 'PLAY' || gameStatus !== GameStatus.PLAYING) return;
             const [svgX, svgY] = pointer(event, svg.node());
@@ -471,7 +496,7 @@
                         s.classList.toggle('translate-x-1', !isStudy);
                       });
                       if (isStudy) clearTimeout(timerId); else startGame(countries);
-                      renderGameInfo(); renderMap();
+                      renderGameInfo(); updateMap();
                   });
                 } else { // timed
                   btn.addEventListener('click', () => {
@@ -492,6 +517,30 @@
         }
         
         // --- Initialization ---
+        function initMap() {
+            g.selectAll('path')
+                .data(countries, d => d.id)
+                .join('path')
+                .attr('d', pathGenerator);
+
+            g.selectAll('text.country-label')
+                .data(countries, d => d.id)
+                .join('text')
+                .attr('x', d => pathGenerator.centroid(d)[0])
+                .attr('y', d => pathGenerator.centroid(d)[1])
+                .text(d => d.properties.name)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'middle')
+                .attr('class', 'country-label fill-white/90 font-semibold pointer-events-none')
+                .style('display', 'none')
+                .style('stroke', 'rgba(0,0,0,0.5)')
+                .style('stroke-width', 0.2);
+
+            g.append('circle')
+                .attr('class', 'marker fill-blue-400 stroke-white pointer-events-none')
+                .attr('r', 0);
+        }
+
         async function init() {
             const storedScore = localStorage.getItem('countryGuesserHighScore');
             if (storedScore) { highScore = parseInt(storedScore, 10); }
@@ -500,11 +549,7 @@
             projection = geoMercator().scale(150).translate([800 / 2, 450 / 2]);
             pathGenerator = geoPath().projection(projection);
 
-            zoomBehavior = zoom().scaleExtent([1, 10]).on('zoom', (event) => {
-                currentTransform = event.transform;
-                g.attr('transform', currentTransform);
-                renderMap();
-            });
+            zoomBehavior = zoom().scaleExtent([1, 10]).on('zoom', handleZoom);
             
             svg.call(zoomBehavior).on('dblclick.zoom', null);
 
@@ -513,7 +558,6 @@
             svg.on('click', handleMapClick);
             setupModeToggles();
 
-            // Mobile sidebar logic
             const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             const openBtn = document.getElementById('open-sidebar-btn');
@@ -536,6 +580,7 @@
                 renderGameInfo();
                 const worldData = await (await fetch(WORLD_MAP_URL)).json();
                 countries = feature(worldData, worldData.objects.countries).features.filter(c => c.properties.name && c.id !== '010');
+                initMap();
                 startGame(countries);
             } catch (error) {
                 console.error('Error loading map data:', error);
