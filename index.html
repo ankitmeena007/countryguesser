@@ -34,23 +34,22 @@
             animation: pulse 1s infinite;
         }
     </style>
-  <link rel="stylesheet" href="/index.css">
-</head>
+  </head>
   <body class="bg-slate-900 text-white antialiased overflow-hidden">
     <main class="w-screen h-screen flex flex-col md:flex-row font-sans">
-        <aside class="w-full md:w-72 md:flex-shrink-0 bg-slate-800 p-4 md:p-6 flex flex-col items-center justify-start md:justify-between gap-6 md:gap-0 border-b md:border-b-0 md:border-r border-slate-700 shadow-2xl">
+        <aside class="w-full md:w-72 md:flex-shrink-0 bg-slate-800 p-2 md:p-6 flex flex-col items-center justify-start md:justify-between gap-4 md:gap-0 border-b md:border-b-0 md:border-r border-slate-700 shadow-2xl">
           <div>
-            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-center">Country Guesser</h1>
-            <div class="mt-6 space-y-4">
+            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-center">Country Guesser</h1>
+            <div class="mt-4 space-y-3">
               <div class="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
-                <span class="font-semibold text-lg">Study Mode</span>
+                <span class="font-semibold text-base">Study Mode</span>
                 <button id="study-mode-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-600">
                   <span class="sr-only">Toggle Study Mode</span>
                   <span id="study-mode-switch" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1"></span>
                 </button>
               </div>
               <div class="flex items-center justify-between p-2 bg-slate-700/50 rounded-lg">
-                <span class="font-semibold text-lg">Timed Mode</span>
+                <span class="font-semibold text-base">Timed Mode</span>
                 <button id="timed-mode-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-cyan-500">
                   <span class="sr-only">Toggle Timed Mode</span>
                   <span id="timed-mode-switch" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-6"></span>
@@ -64,8 +63,8 @@
           </div>
     
           <div class="w-full">
-            <h3 class="text-xl font-bold mb-2 text-center text-yellow-400 border-t border-slate-700 pt-4">High Score</h3>
-            <p id="high-score" class="text-2xl sm:text-3xl font-bold text-center text-white">0 <span class="text-lg font-normal text-slate-400">pts</span></p>
+            <h3 class="text-lg font-bold mb-1 text-center text-yellow-400 border-t border-slate-700 pt-2">High Score</h3>
+            <p id="high-score" class="text-2xl sm:text-3xl font-bold text-center text-white">0 <span class="text-base font-normal text-slate-400">pts</span></p>
           </div>
         </aside>
         <div class="flex-1 flex flex-col items-center p-2 sm:p-4 relative">
@@ -78,8 +77,8 @@
             <div id="map-container" class="w-full h-full bg-slate-800 rounded-lg overflow-hidden shadow-lg border border-slate-700 relative">
                 <svg id="world-map" width="100%" height="100%" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet"></svg>
                 <div class="absolute bottom-4 right-4 flex flex-col space-y-2 z-10">
-                    <button id="zoom-in" class="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom in">+</button>
-                    <button id="zoom-out" class="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom out">-</button>
+                    <button id="zoom-in" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom in">+</button>
+                    <button id="zoom-out" class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 rounded-full flex items-center justify-center text-2xl sm:text-3xl hover:bg-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400" aria-label="Zoom out">-</button>
                 </div>
             </div>
           </div>
@@ -159,37 +158,37 @@
                     </div>`;
             } else { // Playing mode
                 const hearts = Array.from({ length: 3 }).map((_, i) =>
-                    `<svg class="w-8 h-8 ${i < lives ? 'text-red-500' : 'text-slate-600'} transition-colors" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`
+                    `<svg class="w-7 h-7 ${i < lives ? 'text-red-500' : 'text-slate-600'} transition-colors" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>`
                 ).join('');
                 const timerClass = timeLeft < 10 && isTimedMode ? 'text-red-500 animate-pulse' : 'text-white';
                 
                 content = `
-                    <div class="w-full flex flex-col space-y-4 text-center">
+                    <div class="w-full flex flex-col space-y-2 text-center">
                         <div>
-                            <p class="text-lg text-slate-400">Find this country:</p>
-                            <h2 class="text-2xl md:text-3xl font-bold text-cyan-400 break-words min-h-[5rem] md:h-20 flex items-center justify-center" title="${targetCountry?.properties.name || ''}">${targetCountry?.properties.name || '...'}</h2>
-                            <p id="feedback-message" class="text-md text-yellow-400 h-10"></p>
+                            <p class="text-base text-slate-400">Find this country:</p>
+                            <h2 class="text-xl md:text-3xl font-bold text-cyan-400 break-words min-h-[4rem] md:h-20 flex items-center justify-center" title="${targetCountry?.properties.name || ''}">${targetCountry?.properties.name || '...'}</h2>
+                            <p id="feedback-message" class="text-sm text-yellow-400 h-6"></p>
                         </div>
                         ${isTimedMode ? `
                         <div>
-                            <p class="text-lg text-slate-400">Time Left</p>
-                            <p id="timer" class="text-3xl sm:text-4xl font-bold transition-colors ${timerClass}">${timeLeft}</p>
+                            <p class="text-base text-slate-400">Time Left</p>
+                            <p id="timer" class="text-2xl sm:text-4xl font-bold transition-colors ${timerClass}">${timeLeft}</p>
                         </div>` : ''}
                         <div class="flex justify-around items-center w-full">
                             <div>
-                                <p class="text-lg text-slate-400">Lives</p>
-                                <div class="flex justify-center space-x-2 mt-2">${hearts}</div>
+                                <p class="text-base text-slate-400">Lives</p>
+                                <div class="flex justify-center space-x-1 mt-1">${hearts}</div>
                             </div>
                             <div>
-                                <p class="text-lg text-slate-400">Streak</p>
-                                <p class="text-3xl font-bold">${streak} 🔥</p>
+                                <p class="text-base text-slate-400">Streak</p>
+                                <p class="text-2xl font-bold">${streak} 🔥</p>
                             </div>
                         </div>
                         <div>
-                            <p class="text-lg text-slate-400">Score</p>
-                            <p class="text-3xl sm:text-4xl font-bold">${score}</p>
+                            <p class="text-base text-slate-400">Score</p>
+                            <p class="text-2xl sm:text-4xl font-bold">${score}</p>
                         </div>
-                        <button id="hint-btn" ${hintsLeft <= 0 || !!correctGuessId || !!revealedHintCountryId ? 'disabled' : ''} class="px-6 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors shadow-md disabled:bg-slate-700 disabled:cursor-not-allowed">
+                        <button id="hint-btn" ${hintsLeft <= 0 || !!correctGuessId || !!revealedHintCountryId ? 'disabled' : ''} class="px-5 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-500 transition-colors shadow-md disabled:bg-slate-700 disabled:cursor-not-allowed">
                             Hint (${hintsLeft})
                         </button>
                     </div>`;
@@ -209,7 +208,7 @@
         }
 
         function updateHighScore() {
-            highScoreEl.innerHTML = `${highScore} <span class="text-lg font-normal text-slate-400">pts</span>`;
+            highScoreEl.innerHTML = `${highScore} <span class="text-base font-normal text-slate-400">pts</span>`;
         }
         
         // --- Map Rendering ---
@@ -532,6 +531,5 @@
 
         init();
     </script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>
