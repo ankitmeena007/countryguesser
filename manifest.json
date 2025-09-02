@@ -1,0 +1,23 @@
+{
+  "name": "Country Guesser",
+  "short_name": "CountryGuesser",
+  "description": "A geography game where you guess countries on a world map. Test your knowledge by placing a marker on the correct country to increase your score. You have 60 seconds for each guess!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "images/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
