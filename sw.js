@@ -1,9 +1,9 @@
 const CACHE_NAME = 'country-guesser-v1';
 const URLS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/images/favicon.ico',
-  '/images/favicon.png',
+  '.',
+  'index.html',
+  'images/favicon.ico',
+  'images/favicon.png',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
   'https://esm.sh/topojson-client@3.1.0',
