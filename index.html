@@ -160,7 +160,7 @@
         setAppHeight();
         
         import { feature } from 'topojson-client';
-        import { geoMercator, geoPath, geoContains } from 'd3-geo';
+        import { geoMercator, geoPath, geoContains, geoArea } from 'd3-geo';
         import { zoom, zoomIdentity } from 'd3-zoom';
         import { select, pointer } from 'd3-selection';
         import 'd3-transition';
@@ -275,31 +275,54 @@
         // --- Map Rendering (Optimized) ---
         function updateStudyLabelStyles(k) {
             const labels = g.selectAll('text.country-label');
-            const effectiveZoom = Math.sqrt(k);
 
-            labels.style('font-size', d => {
+            // Tier-based font sizes (target apparent size on screen in pixels)
+            const tierFontSizes = {
+                1: 16, // Top 5% area
+                2: 14, // 80-95%
+                3: 12, // 60-80%
+                4: 11, // 40-60%
+                5: 10, // Bottom 40%
+                6: 0,
+            };
+            
+            // Zoom thresholds for when labels for each tier should appear
+            const tierZoomThresholds = {
+                1: 1,   // Always visible
+                2: 1.2,
+                3: 1.5,
+                4: 2.2,
+                5: 3.5,
+                6: 999, // Never visible
+            };
+
+            labels.each(function(d) {
+                const el = select(this);
+                const tier = d.properties.tier;
+                
+                // Hide if no tier, or below zoom threshold for its tier
+                if (!tier || k < tierZoomThresholds[tier]) {
+                    el.style('display', 'none');
+                    return;
+                }
+
+                const baseFontSize = tierFontSizes[tier];
                 const bounds = pathGenerator.bounds(d);
-                const width = bounds[1][0] - bounds[0][0];
-                const nameLength = d.properties.name.length;
+                const projectedWidth = bounds[1][0] - bounds[0][0];
 
-                if (nameLength === 0) return '0px';
+                // Estimate label width in projected coordinates. 
+                // 0.55 is a heuristic for average character width to height ratio for this font.
+                const estimatedLabelWidth = d.properties.name.length * (baseFontSize / k) * 0.55;
 
-                // Heuristic to calculate a font size that aims for the text to fill
-                // a significant portion of the country's width.
-                let sizeFromWidth = (width * 1.25) / nameLength;
-
-                // For small/narrow countries, this can be tiny. We need a readable minimum.
-                // This minimum can be larger than the country itself, as requested.
-                const absoluteMinSize = 4.0;
-                const absoluteMaxSize = 20.0; // Cap the font size for very large countries.
-                
-                // Use the larger of the calculated size or the absolute minimum, but cap at max size.
-                const unscaledFontSize = Math.min(Math.max(sizeFromWidth, absoluteMinSize), absoluteMaxSize);
-                
-                // Apply zoom scaling so text appears to grow when zooming in.
-                return `${unscaledFontSize / effectiveZoom}px`;
-            })
-            .style('stroke-width', `${0.3 / effectiveZoom}px`);
+                // Hide if the country's projected width is smaller than the estimated label width
+                if (projectedWidth < estimatedLabelWidth) {
+                     el.style('display', 'none');
+                } else {
+                     el.style('display', 'block')
+                       .style('font-size', `${baseFontSize / k}px`)
+                       .style('stroke-width', `${0.4 / k}px`); // Slightly thicker stroke for readability
+                }
+            });
         }
 
         function updateMap() {
@@ -615,6 +638,31 @@
                 renderGameInfo();
                 const worldData = await (await fetch(WORLD_MAP_URL)).json();
                 countries = feature(worldData, worldData.objects.countries).features.filter(c => c.properties.name && c.id !== '010');
+                
+                // --- Tiering logic for label sizing and visibility ---
+                const areas = countries.filter(c => c.geometry).map(c => geoArea(c)).sort((a, b) => a - b);
+                const areaQuantiles = {
+                    q95: areas[Math.floor(0.95 * areas.length)],
+                    q80: areas[Math.floor(0.80 * areas.length)],
+                    q60: areas[Math.floor(0.60 * areas.length)],
+                    q40: areas[Math.floor(0.40 * areas.length)],
+                };
+
+                countries.forEach(c => {
+                    if (!c.geometry) {
+                        c.properties.tier = 6; // No geometry, no label
+                        return;
+                    }
+                    const area = geoArea(c);
+                    c.properties.area = area;
+                    if (area >= areaQuantiles.q95) c.properties.tier = 1;      // Top 5% (e.g., Russia, Canada)
+                    else if (area >= areaQuantiles.q80) c.properties.tier = 2; // 80-95% (e.g., USA, China)
+                    else if (area >= areaQuantiles.q60) c.properties.tier = 3; // 60-80% (e.g., India, Argentina)
+                    else if (area >= areaQuantiles.q40) c.properties.tier = 4; // 40-60% (e.g., Germany, Japan)
+                    else c.properties.tier = 5;                                // Bottom 40% (e.g., Switzerland, Israel)
+                });
+                // --- End of tiering logic ---
+
                 initMap();
                 startGame(countries);
             } catch (error) {
